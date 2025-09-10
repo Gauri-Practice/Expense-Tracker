@@ -251,6 +251,17 @@ while True:
                         print("❌ Invalid confirmation input. No records were deleted.")
                 continue
 
+
+        elif delete_choice.upper() == "D":
+            confirmation_all = input("Type YES to confirm, or NO to cancle: ").strip().upper()
+            if not confirmation_all:
+                print("No data deleted.")
+
+            elif confirmation_all == "YES":
+                mycursor.execute("delete from expenses")
+                mydb.commit()
+                print("Data deleted successfully.")
+
         else:
             print("❌ Invalid choice. Please try again.")
             continue

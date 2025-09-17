@@ -47,9 +47,11 @@ while True:
         Amount = float(input("Enter amount: "))
         Category = input("Enter category: ")
         Description = input("Enter description: ")
+        Payment_Platform = input("Enter your expense platform: ")
+        Bank_Name = input("Enter bank name: ")
 
-        sql = "INSERT INTO expenses(Date, Amount, Category, Description) VALUES (%s,%s,%s,%s)"
-        values = (Date, Amount, Category, Description)
+        sql = "INSERT INTO expenses(Date, Amount, Category, Description) VALUES (%s,%s,%s,%s,%s,%s)"
+        values = (Date, Amount, Category, Description, Payment_Platform, Bank_Name)
 
         mycursor.execute(sql, values)
         mydb.commit()
@@ -62,8 +64,12 @@ while True:
         print("A. View All")
         print("B. View by date")
         print("C. View by category")
-        view_choice = input("Enter your choice: ")
+        print("D. View by payment platform")
+        print("E. View by bank name")
 
+        view_choice = input("Enter your choice: ")
+        
+        # To view all
         if view_choice.upper() == "A":
             mycursor.execute("SELECT * FROM expenses")
             result = mycursor.fetchall()
@@ -74,6 +80,7 @@ while True:
                 print("⚠️ No records found")
             continue
 
+        # View by date
         elif view_choice.upper() == "B":
             view_by_start_date = input("Enter start date (YYYY-MM-DD): ")
             view_by_end_date = input("Enter end date (YYYY-MM-DD): ")
@@ -89,6 +96,7 @@ while True:
                 print("⚠️ No records found in given range")
             continue
 
+        # View by category
         elif view_choice.upper() == "C":
             view_by_category = input("Enter category: ")
             mycursor.execute("SELECT * FROM expenses WHERE category = %s", (view_by_category,))
@@ -100,48 +108,159 @@ while True:
                 print("⚠️ No expenses found")
             continue
 
+        # # View by payment platform
+        # elif view_choice.upper() == "D":
+        #     view_payment_platform = input("Enter platform name: ")
+        #     mycursor.execute("Select * from expenses where payment_platform = %s",(view_payment_platform,))
+        #     view_platform_result = mycursor.fetchall()
+
+        #     if not view_platform_result:
+        #         print(f"No expenses found via {view_payment_platform}")
+
+        #     else:
+        #         for rows in view_platform_result:
+        #             print(rows)
+        #             print("--End--")
+
+
+        # # View by bank name
+        # elif view_choice.upper() == "F":
+        #     view_bank = input("Enter bank name: ")
+        #     mycursor.execute("Select * from expenses where bank_name = %s")
+        #     view_bank_result = mycursor.fetchall()
+
+        #     if not view_bank_result:
+        #         print(f"No expense found via {view_bank}")
+
+        #     elif view_bank_result:
+        #         for rows in view_bank_result:
+        #             print(rows)
+        #             print("--End--")
+
+        # else:
+        #     print("Invalid choice. Please try again.")
+
+
+
     # 3. Update expense
     elif choice == "3":
-        new_amt = float(input("Enter new amount: "))
-        id_to_update = int(input("Enter ID to update: "))
+        print("A. Update category")
+        print("B. Update date")
+        print("C. Update amount")
+        print("D. Update description")
+        print("E. Update payment platform")
+        print("F. Update bank name")
 
-        mycursor.execute("SELECT * FROM expenses WHERE id = %s", (id_to_update,))
-        record = mycursor.fetchone()
+        Update_choice = input("Enter your choice: ")
 
-        if record:
-            mycursor.execute(
-                "UPDATE expenses SET amount = %s WHERE id = %s",
-                (new_amt, id_to_update)
-            )
+        # Update category
+        if Update_choice.upper() == "A":
+            update_C_by_ID = int(input("Enter ID: "))
+            update_category = input("Enter category: ")
+        
+            mycursor.execute("update expenses set category = %s where ID = %s",(update_category,update_C_by_ID,))
             mydb.commit()
-            print(mycursor.rowcount, "record(s) updated")
-        else:
-            print("⚠️ No record found with that ID!")
-        continue
 
-    #     # 7. Total spent
-    # elif choice == "4":
-    #     mycursor.execute("SELECT SUM(amount) FROM expenses")
-    #     total = mycursor.fetchone()[0]
+            if mycursor.rowcount == 0:
+                print(f"No data found in {update_C_by_ID}")
 
-    #     if total is None:
-    #         total = 0.0
-    #     else:
-    #         total = float(total)
-    #     print("💰 Total spent:", total)
-    #     continue
+            else:
+                print(f"Category updated successfully for ID {update_C_by_ID}")
 
 
+    # Update date
+        elif Update_choice.upper() == "B":
+            update_D_by_ID = int(input("Enter ID: "))
+            update_date = input("Enter date (YYYY-MM-DD): ")
 
+            mycursor.execute("update expenses set date = %s where ID = %s",(update_date,update_D_by_ID,))
+            mydb.commit()
+
+            if mycursor.rowcount == 0:
+                print(f"No data found in {update_D_by_ID}")
+
+            else:
+                print(f"Date updated successfully for ID {update_D_by_ID}")
+
+
+        # Update amount
+        elif Update_choice.upper() == "C":
+            new_amt = float(input("Enter new amount: "))
+            id_to_update = int(input("Enter ID to update: "))
+
+            mycursor.execute("SELECT * FROM expenses WHERE id = %s", (id_to_update,))
+            record = mycursor.fetchone()
+
+            if record:
+                mycursor.execute(
+                    "UPDATE expenses SET amount = %s WHERE id = %s",
+                    (new_amt, id_to_update)
+                )
+                mydb.commit()
+                print(mycursor.rowcount, "record(s) updated")
+            else:
+                print("⚠️ No record found with that ID!")
+            continue
+
+
+        # Update description
+        elif Update_choice.upper() == "D":
+            update_D_by_ID = int(input("Enter ID: "))
+            update_description = input("Enter description: ")
+
+            mycursor.execute("update expenses set description = %s where ID = %s",(update_description,update_D_by_ID,))
+            mydb.commit()
+
+            if mycursor.rowcount == 0:
+                print(f"No data found in {update_D_by_ID}")
+
+            else:
+                print(f"Description updated successfully for ID {update_D_by_ID}")
+
+        # # Update payment platform
+        # elif Update_choice.upper() == "E":
+        #     update_P_by_ID = int(input("Enter ID: "))
+        #     update_platform = input("Enter payment platform: ")
+
+        #     mycursor.execute("update expenses set payment_platform = %s where ID = %s", (update_platform,update_P_by_ID,))
+        #     mydb.commit()
+
+        #     if mycursor.rowcount == 0:
+        #         print(f"No data found in {update_P_by_ID}")
+
+        #     else:
+        #         print(f"Description updated successfully for ID {update_P_by_ID}")
+
+        
+        # # Update bank name
+        # elif Update_choice.upper() == "F":
+        #     update_B_by_ID = int(input("Enter ID: "))
+        #     update_bank = input("Enter bank name: ")
+
+        #     mycursor.execute("update expenses set bank_name = %s where id = %s",(update_bank,update_B_by_ID,))
+        #     mydb.commit()
+
+        #     if mycursor.rowcount == 0:
+        #         print(f"No data found in {update_B_by_ID}")
+
+        #     else:
+        #         print(f"Bank name updated successfully for ID {update_B_by_ID}")
+
+        # else :
+        #     print("Invalid choice. Please try again.")
+
+
+    # For Option 4. Total spent
     elif choice == "4":
         print("A. Total spent")
         print("B. Total spent by Category")
         print("C. Total spent by Date")
+        print("D. Total spent by Payment platform")
+        print("E. Total spent by Bank name")
 
         Total_choice = input("Enter your choice: ")
 
     # Total spent
-    # 
         if Total_choice.upper() == "A":
             mycursor.execute("select sum(amount) as total from expenses")
             total_result = mycursor.fetchall()
@@ -178,6 +297,76 @@ while True:
 
             else:
                 print(f"Total expense in {Total_start_date} to {Total_end_date} is {date_sum}")
+
+
+    # # Total spent by Payment platform
+    #     elif Total_choice.upper() == "D":
+    #         print("You can fetch total spent of single or bunch of payment platforms")
+    #         Total_plateform = input("Enter payment platform name: ")
+    #         T_platform = [t.strip().upper() for t in Total_plateform.split(",") if t.split()]
+
+    #         mycursor.execute("select sum(amount) as total from expenses where payment_platform = %s",(Total_plateform,))
+    #         platform_sum = mycursor.fetchone()
+
+    #         if mycursor.rowcount == 0:
+    #             print(f"No expense found via {Total_plateform}")
+
+    #         else:
+    #             print(f"Total expense via {Total_plateform} is {platform_sum,0}")
+
+
+    # # Total spent by Bank name
+    #     elif Total_choice.upper() == "E":
+    #         print("You can fetch total spent of single bank and bunch of banks. You just need to seperate them by ','")
+    #         Total_bank = input("Enter bank name(s) seperated by comma: ")
+    #         spent_banks = [b.strip().upper() for b in Total_bank.split(",") if b.strip()]
+
+    #         if not spent_banks:
+    #             print(f"No expense found via {Total_bank}")
+
+    #         elif spent_banks:
+    #             placeholders = ",".join(["%s"] * len(spent_banks))
+    #             query = f"""
+    #                 select upper(bank_name),coalesce(sum(amount), 0) as total
+    #                 from expenses
+    #                 where upper(bank_name) in ({placeholders})
+    #                 group by upper(bank_name)
+    #                 """
+
+    #             mycursor.execute(query,spent_banks)
+    #             rows = mycursor.fetchall()
+
+    #             totals = {bank_name: total for bank_name, total in rows}
+
+    #             for b in spent_banks:
+    #                 print(f"Total spent from {b}: {totals.get(b,0)}")
+
+    #     else:  
+    #         print("Invalid choice. Please try again.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     # 6. Delete expense

@@ -64,8 +64,8 @@ while True:
         print("A. View All")
         print("B. View by date")
         print("C. View by category")
-        print("D. View by payment platform")
-        print("E. View by bank name")
+        # print("D. View by payment platform")
+        # print("E. View by bank name")
 
         view_choice = input("Enter your choice: ")
         
@@ -148,8 +148,8 @@ while True:
         print("B. Update date")
         print("C. Update amount")
         print("D. Update description")
-        print("E. Update payment platform")
-        print("F. Update bank name")
+        # print("E. Update payment platform")
+        # print("F. Update bank name")
 
         Update_choice = input("Enter your choice: ")
 
@@ -255,8 +255,8 @@ while True:
         print("A. Total spent")
         print("B. Total spent by Category")
         print("C. Total spent by Date")
-        print("D. Total spent by Payment platform")
-        print("E. Total spent by Bank name")
+        # print("D. Total spent by Payment platform")
+        # print("E. Total spent by Bank name")
 
         Total_choice = input("Enter your choice: ")
 

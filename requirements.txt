@@ -1,3 +1,4 @@
-mysql-connector-python==9.3.0
-python-dotenv==1.1.1
-Streamlit, version 1.49.1
+altair==5.5.0
+matplotlib==3.10.6
+pandas==2.3.2
+streamlit==1.49.1

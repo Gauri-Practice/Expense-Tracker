@@ -26,3 +26,10 @@ A command-line Expense Tracker built with **Python** and **MySQL** to manage per
    ```bash
    python Expense_Tracker.py
    ```
+
+
+#-----------------------------------
+Expense Tracker Streamlit Version
+#-----------------------------------
+Experience the interactive Stramlit version of Expense Tracker here:
+https://expense-tracker-mode.streamlit.app/

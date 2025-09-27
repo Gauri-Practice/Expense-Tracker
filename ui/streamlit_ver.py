@@ -1,5 +1,7 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
+import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Expense Tracker", layout="wide")
 # page_title | text shown on the browser tab
@@ -24,7 +26,7 @@ st.sidebar.header("Navigation")
 # st.sidebar is a shortcut to put widgets in the sidebar.
 # widgets | small tools or anything button. Like: st.sidebar.button, st.sidebar.selectbox.
 
-page = st.sidebar.radio("Go to", ["Add Expenses", "View Expenses"])
+page = st.sidebar.radio("Go to", ["Add Expenses", "View Expenses", "Summary/Analytics"])
 # page | where data would be save
 # radio() | radio button
 
@@ -67,13 +69,11 @@ if page == "Add Expenses":
           if submitted:
                if category_choice == "Other":
                     custom_val = st.session_state.get("custom_category", "").strip()
-                    if not custom_category.strip():
+                    if not custom_val:
                          st.error("⚠️ Please enter a custom category or choose another category.")
                     else:
-                         final_category = custom_category.strip().title()
-                         # final_category = custom_category.strip() | Ensure the expense goes under the custom input instead of "Other".
-                         # .strip() removes spaces.
-                         # If user leave custom category blank, it stop and show and error(so category can't be empty).
+                         final_category = custom_val.title()
+                         # .title() | Ensure custom categories look neat (e.g. "travel" → "Travel")
 
                          if final_category not in st.session_state["category"]:
                               try:
@@ -91,29 +91,27 @@ if page == "Add Expenses":
                          # list.index("Other") raises ValueError if "Other" is not found (edge case.) The except handles that situation.
                          # If Other is missing, we simply append the new category to the end of the list (again checking duplicates before adding).
 
-          
-
-
-                         
+                              
                          st.session_state["expenses"].append({
                               "Amount":float(st.session_state.get("amt", 0.0)),
                               "Category": final_category,
                               "Date": st.session_state.get("date_input"),
-                              "Descripition": st.session_state.get("description", "")
+                              "Description": st.session_state.get("description", "")
                          })
                          st.success("Expense Saved.")
                else:
                     final_category = category_choice
                     st.session_state["expenses"].append({
-                         "Amount": float(amount),
+                         "Amount": float(st.session_state.get("amt", 0.0)),
                          "Category": final_category,
-                         "Date": date_input,
-                         "Description": description
+                         "Date": st.session_state.get("date_input"),
+                         "Description": st.session_state.get("description", "")
                     })
                     st.success("✅ Expense saved.")
 
-
+# --------------------
 # View Expenses Page
+# --------------------
 elif page == "View Expenses":
      st.subheader("All Expenses")
              
@@ -156,3 +154,83 @@ elif page == "View Expenses":
         # st.info() shows an informational blue box.
         # append({}) | is a list method that add whatever we oout inside of parentheses add as a  list.
           st.dataframe(df)
+
+
+# -------------------------
+# Analytics/Summary Page
+# -------------------------
+
+if page == "Summary/Analytics":
+     st.title("Expense Summary / Analytics")
+# if page == "Summary / Analytics" | runs only when that option is selected.
+
+     if "expenses" in st.session_state and st.session_state["expenses"]:
+          df = pd.DataFrame(st.session_state["expenses"])
+     else:
+          st.warning("No expenses found! Please add some first.")
+          st.stop()
+     # if "expenses" in st.session_state | check if expenses are saved.
+     # and st.session_state["expenses"] | check list is not empty.
+     # pd.DataFrame(st.session_state["expenses"]) | convert list of expenses into a table-like structure(DataFrame) for analysis.
+     # st.warning(...) | show yellow box if there is no data.
+     # st.stop() | stop running further code if no expenses(avoid errors).
+
+     total_expense = df["Amount"].sum()
+     avg_expenses = df["Amount"].mean()
+
+     st.metric("Total Expense", f"₹{total_expense: .2f}")
+     st.metric("Average Expense", f"₹{avg_expenses: .2f}")
+     # df["Amount"].sum() | Adds all expenses = total spending.
+     # df["Amount"].mean() | find average spending
+     # st.metric("Total Expense", f"₹{total_expense: .2f}"") | Shows a card with a number.
+     # f"₹{total_expense: .2f}" | Formats the number as currency with 2 decimals (e.g. ₹1500.50).
+
+     category_summary = df.groupby("Category")["Amount"].sum().reset_index()
+     # group all expenses by Category and calculate the total Amount for each.
+     # reset_index() | turn the grouped data back into a clean DataFrame with two columns: Category and Amount.
+
+     st.subheader("Expenses by Category")
+     category_chart = alt.Chart(category_summary).mark_bar().encode(
+          x=alt.X("Category:N", title="Category", axis=alt.Axis(labelAngle=0)),
+          y=alt.Y("Amount:Q", title="Total Expenses", scale=alt.Scale(zero=True))
+     ).properties(
+          width=600,
+          height=400,
+          title="Expenses by Category"
+     )
+     st.altair_chart(category_chart, use_container_width=True)
+     # alt.Chart(category_chart, summary) | tells altair to use that DataFrame.
+     # .mark_bar() | mark it a bar chart.
+     # .encode(...) | maps DataFrame columns to chart axes:
+          # • x-alt.X("Category:N") | Category column shown on X-axis.
+          # :N | "Nominal"(categorical).
+          # • y=alt.Y("Amount:Q", scale=alt.Scale(zero=True)) | Amount column on Y-axis.
+          # :Q | "Quantitative" (Numbers).
+          # scale(zero=True) | ensures Y-axis always starts from 0 (no weird scroll repeat).
+          # • .properties(...) | chart styling.
+          # • st.altair_chart(category_chart, use_container-width=True) | renders it in Streamlit, responsive to screen width.
+
+
+
+
+     df["Month"] = pd.to_datetime(df["Date"]).dt.to_period("M").astype(str)
+     monthly_summary = df.groupby("Month")["Amount"].sum().reset_index()
+     # Converts the Date column to monthly periods (2025-09, 2025-101 etc).
+     # (pd.to_datetime(df["Date"]) | converts text data into real date.
+     # .dt.to_period("M") | Extracts just the month part from the data.)
+     
+     # df.groupby("Month")["Amount"].sum() | Group data by month and total spending.
+     # .astype(str) | forces it to show "2025-09" instead of that code.
+
+     st.subheader("Monthly Expenses")
+     monthly_chart = alt.Chart(monthly_summary).mark_line(point=True).encode(
+          x=alt.X("Month:N", title="Month",axis=alt.Axis(labelAngle=0)),
+          y=alt.Y("Amount:Q", title="Total Expenses", scale=alt.Scale(zero=True))
+     ).properties(
+          width=600,
+          height=400,
+          title="Monthly Expenses"
+     )
+     st.altair_chart(monthly_chart, use_container_width=True)
+     # axis=alt.Axis(labelAngle=0) | Rotates month label to 0° (Horizontal).
+     # 

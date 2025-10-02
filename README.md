@@ -29,7 +29,7 @@ A command-line Expense Tracker built with **Python** and **MySQL** to manage per
 
 
 #-----------------------------------
-Expense Tracker Streamlit Version
+\nExpense Tracker Streamlit Version\n
 #-----------------------------------
 Experience the interactive Stramlit version of Expense Tracker here:
 https://expense-tracker-mode.streamlit.app/
